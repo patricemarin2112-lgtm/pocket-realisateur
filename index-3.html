@@ -1,0 +1,1691 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b10">
+<title>Pocket Réalisateur</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<style>
+:root{--b:#090b10;--p:#121720;--l:#28303d;--t:#f4f6f8;--m:#98a3b2;--a:#ffb000;--a2:#ff6a00}
+*{box-sizing:border-box}body{margin:0;background:var(--b);color:var(--t);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button,input,select,textarea{font:inherit}header{position:sticky;top:0;z-index:9;background:#090b10ed;border-bottom:1px solid var(--l);padding:12px 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900}.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--a),var(--a2));color:#111}
+.tabs{display:flex;gap:7px;overflow:auto;margin-top:10px}.tabs button{border:0;background:#171d27;color:var(--m);padding:9px 11px;border-radius:10px;white-space:nowrap}
+.tabs button.on{color:#111;background:var(--a)}main{max-width:1050px;margin:auto;padding:20px 14px 60px}.page{display:none}.page.on{display:block}
+.hero h1{font-size:clamp(34px,8vw,68px);line-height:.98;margin:14px 0}.hero p{color:var(--m);max-width:720px;line-height:1.6}
+.grid{display:grid;grid-template-columns:1.3fr .8fr;gap:14px}.card{background:var(--p);border:1px solid var(--l);border-radius:18px;padding:18px;margin:14px 0}.card h2{margin:0 0 14px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form label,.label{font-size:12px;color:#cbd2dc;display:flex;flex-direction:column;gap:6px}.wide{grid-column:1/-1}
+input,select,textarea{width:100%;border:1px solid var(--l);background:#0b0e14;color:var(--t);border-radius:11px;padding:12px}
+.btn{border:1px solid var(--l);background:#1a202b;color:var(--t);padding:11px 14px;border-radius:11px;font-weight:800;cursor:pointer}.btn.primary{border:0;background:linear-gradient(135deg,var(--a),var(--a2));color:#111}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.scene{border:1px solid var(--l);border-radius:14px;padding:14px;margin:10px 0;background:#0c1016}
+.scene h3{margin:0 0 4px}.scene small,.muted{color:var(--m)}.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.chip{font-size:11px;padding:6px 8px;background:#202633;border-radius:999px}
+.camera{background:#000;border-radius:16px;overflow:hidden;aspect-ratio:16/9;position:relative}.camera video{width:100%;height:100%;object-fit:cover}
+.clap{display:none;position:absolute;left:12px;bottom:12px;background:#06080bdd;border-left:4px solid var(--a);padding:10px;border-radius:9px}.clap.on{display:block}
+.rec{width:62px;height:62px;border-radius:50%;border:6px solid white;background:#ef3340}.rec.on{border-radius:15px;transform:scale(.75)}
+.take{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;border:1px solid var(--l);border-radius:13px;margin:10px 0}.take video{width:150px;aspect-ratio:16/9;background:#000;border-radius:9px}
+.fav{color:#ffd35c}.empty{text-align:center;color:var(--m);padding:30px}.tip{border:1px solid #5a4200;background:#2d2100;padding:12px;border-radius:12px;color:#e5c86f}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}.kpi{padding:14px;border:1px solid var(--l);border-radius:14px;background:#10151e}.kpi b{display:block;font-size:26px}.kpi span{color:var(--m);font-size:12px}
+
+.editorGrid{display:grid;grid-template-columns:1.35fr .85fr;gap:14px}
+.editorPreview{background:#000;border:1px solid var(--l);border-radius:16px;overflow:hidden;position:relative;aspect-ratio:16/9;display:grid;place-items:center}
+.editorPreview video{width:100%;height:100%;object-fit:contain;transform-origin:center}
+.textOverlay{position:absolute;left:8%;right:8%;bottom:10%;text-align:center;font-weight:900;font-size:clamp(18px,4vw,38px);text-shadow:0 2px 8px #000,0 0 2px #000;pointer-events:none;white-space:pre-wrap}
+.controls{display:grid;gap:12px}.control{border-bottom:1px solid var(--l);padding-bottom:11px}.control:last-child{border:0}
+.controlHead{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:6px}.controlHead b{font-size:13px}.controlHead span{font-size:12px;color:var(--m)}
+.rangeRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rangeRow label{font-size:11px;color:var(--m)}
+.rangeRow input,.control input[type=range]{padding:0;accent-color:var(--a)}
+.editorStatus{font-size:12px;color:var(--m);min-height:18px}.progress{height:8px;background:#0a0d12;border-radius:99px;overflow:hidden;border:1px solid var(--l)}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--a2))}
+.smallBtns{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.smallBtns .btn{padding:9px 7px;font-size:12px}
+@media(max-width:760px){.editorGrid{grid-template-columns:1fr}.smallBtns{grid-template-columns:repeat(2,1fr)}}
+
+@media(max-width:760px){.grid,.form{grid-template-columns:1fr}.wide{grid-column:auto}.take{grid-template-columns:1fr}.take video{width:100%}}
+
+.montageTop{display:grid;grid-template-columns:1.3fr .7fr;gap:14px}
+.montagePreview{aspect-ratio:16/9;background:#000;border:1px solid var(--l);border-radius:16px;overflow:hidden;position:relative;display:grid;place-items:center}
+.montagePreview video{width:100%;height:100%;object-fit:contain}
+.previewTitle{position:absolute;inset:0;display:none;place-items:center;padding:8%;text-align:center;font-size:clamp(26px,6vw,64px);font-weight:900;background:#000;color:#fff}
+.previewTitle.on{display:grid}
+.libraryGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.libraryClip{border:1px solid var(--l);background:#0c1016;border-radius:13px;padding:10px}
+.libraryClip b,.libraryClip small{display:block}.libraryClip small{color:var(--m);margin-top:4px}
+.timeline{display:flex;gap:10px;overflow-x:auto;padding:12px 2px 18px;scroll-snap-type:x proximity}
+.timelineItem{min-width:270px;max-width:270px;border:1px solid var(--l);background:#0b0f15;border-radius:14px;padding:12px;scroll-snap-align:start}
+.timelineItem.active{outline:2px solid var(--a)}
+.timelineItem h3{font-size:14px;margin:0 0 4px}.timelineItem small{color:var(--m)}
+.timelineNum{width:28px;height:28px;border-radius:9px;background:#2f2200;color:var(--a);display:grid;place-items:center;font-weight:900;margin-bottom:8px}
+.clipTools{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}.clipTools label{font-size:10px;color:var(--m)}
+.clipTools input,.clipTools select{padding:8px;font-size:12px}
+.moveRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}.moveRow .btn{padding:8px 6px;font-size:11px}
+.audioRow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.montageSettings{display:grid;gap:12px}
+.statusBox{padding:11px;border-radius:11px;background:#0b0f15;border:1px solid var(--l);color:var(--m);font-size:12px}
+.timelineEmpty{min-height:140px;display:grid;place-items:center;text-align:center;color:var(--m);border:1px dashed var(--l);border-radius:14px;padding:20px}
+@media(max-width:760px){.montageTop{grid-template-columns:1fr}.libraryGrid{grid-template-columns:1fr}.timelineItem{min-width:245px;max-width:245px}}
+
+
+.sceneLibrary{display:grid;gap:12px;margin-top:12px}
+.recordedScene{border:1px solid var(--l);background:#0c1016;border-radius:14px;padding:14px}
+.recordedSceneHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.recordedSceneHead h3{margin:0 0 4px;font-size:16px}.recordedSceneHead small{color:var(--m)}
+.sceneTakes{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.sceneTake{display:flex;align-items:center;gap:8px;padding:9px;border:1px solid var(--l);border-radius:10px;background:#10151d}
+.sceneTake input{width:auto}.sceneTake span{font-size:12px}.sceneActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.sceneActions .btn{font-size:12px;padding:9px 10px}
+@media(max-width:760px){.sceneTakes{grid-template-columns:1fr}}
+
+
+.clipEditorPanel{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
+.toolPanel{border:1px solid var(--l);background:#10151e;border-radius:16px;padding:16px}
+.toolPanel h2{margin:0 0 4px}.toolPanel .muted{font-size:12px}
+.toolGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.toolGroup{border:1px solid var(--l);background:#0b0f15;border-radius:12px;padding:11px}
+.toolGroup h3{font-size:12px;margin:0 0 10px;color:#e7ebf0}
+.toolGroup label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--m);margin-top:8px}
+.toolGroup input,.toolGroup select{padding:9px}
+.toolGroup input[type=range]{padding:0;accent-color:var(--a)}
+.toolReadout{display:flex;justify-content:space-between;gap:10px;font-size:11px;color:var(--m);margin-top:5px}
+.toolButtons{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.toolButtons .btn{font-size:11px;padding:8px 6px}
+.clipPreviewBox{aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;position:relative;display:grid;place-items:center;border:1px solid var(--l)}
+.clipPreviewBox video{width:100%;height:100%;object-fit:contain;transform-origin:center}
+.clipPreviewCaption{position:absolute;left:6%;right:6%;bottom:8%;text-align:center;color:#fff;font-size:clamp(18px,3vw,32px);font-weight:900;text-shadow:0 2px 8px #000}
+.selectedHint{padding:12px;border-radius:11px;background:#2d2100;border:1px solid #5c4400;color:#e8cf78;font-size:12px}
+.miniProgress{height:6px;border-radius:99px;background:#07090c;border:1px solid var(--l);overflow:hidden;margin-top:8px}.miniProgress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--a2))}
+@media(max-width:760px){.clipEditorPanel,.toolGrid{grid-template-columns:1fr}.toolButtons{grid-template-columns:1fr 1fr}}
+
+
+.musicActive{border-color:#6b5200!important;background:#241b00!important}
+.musicMeter{height:5px;background:#090b10;border-radius:99px;overflow:hidden;margin-top:8px}
+.musicMeter i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--a),var(--a2))}
+
+
+.musicEditor{display:grid;gap:12px;margin-top:12px;padding:12px;border:1px solid var(--l);border-radius:12px;background:#0b0f15}
+.musicEditorGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.musicEditor label{display:flex;flex-direction:column;gap:6px;font-size:11px;color:var(--m)}
+.musicEditor input,.musicEditor select{padding:9px}
+.musicWave{height:58px;border:1px solid var(--l);border-radius:10px;background:
+linear-gradient(90deg,transparent 0 2%,#ffb00055 2% 3%,transparent 3% 6%,#ffb00077 6% 8%,transparent 8% 11%,#ffb00044 11% 14%,transparent 14% 18%,#ffb00088 18% 21%,transparent 21% 25%,#ffb00055 25% 29%,transparent 29% 34%,#ffb00088 34% 38%,transparent 38% 43%,#ffb00066 43% 47%,transparent 47% 52%,#ffb00099 52% 56%,transparent 56% 62%,#ffb00055 62% 67%,transparent 67% 73%,#ffb00088 73% 78%,transparent 78% 85%,#ffb00055 85% 90%,transparent 90% 100%);
+position:relative;overflow:hidden}
+.musicSelection{position:absolute;top:0;bottom:0;background:#ffb00022;border-left:2px solid var(--a);border-right:2px solid var(--a)}
+.musicMixRow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.musicInfo{font-size:11px;color:var(--m)}
+@media(max-width:760px){.musicEditorGrid,.musicMixRow{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">PR</span><span>Pocket Réalisateur</span></div>
+  <div class="tabs">
+    <button data-tab="projet" class="on">🎬 Projet</button>
+    <button data-tab="scenario">✍️ Scénario</button>
+    <button data-tab="tournage">📱 Tournage</button>
+    <button data-tab="montage">✂️ Montage</button>
+  </div>
+</header>
+
+<main>
+<section id="projet" class="page on">
+  <div class="hero">
+    <div class="muted">STUDIO CINÉMA MOBILE</div>
+    <h1>Ton Samsung devient ton plateau de tournage.</h1>
+    <p>Prépare l’histoire, découpe les scènes, tourne avec un clap numérique et retrouve les prises dans la même application.</p>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><b id="kScenes">0</b><span>scènes</span></div>
+    <div class="kpi"><b id="kPlans">0</b><span>plans</span></div>
+    <div class="kpi"><b id="kTakes">0</b><span>prises</span></div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h2>Ton film</h2>
+      <div class="form">
+        <label>Titre<input id="title" placeholder="Ex. Dernier métro"></label>
+        <label>Genre<select id="genre"><option>Drame</option><option>Comédie</option><option>Thriller</option><option>Policier</option><option>Romance</option><option>Horreur</option><option>Documentaire</option></select></label>
+        <label>Durée<select id="duration"><option>3 min</option><option>5 min</option><option>10 min</option><option>15 min</option><option>30 min</option></select></label>
+        <label>Acteurs<input id="actors" type="number" value="2" min="1"></label>
+        <label class="wide">Lieux<input id="locations" placeholder="Appartement, rue, parc..."></label>
+        <label class="wide">Ton idée<textarea id="idea" rows="6" placeholder="Qui est le personnage ? Que veut-il ? Quel obstacle rencontre-t-il ?"></textarea></label>
+      </div>
+      <div class="actions">
+        <button id="save" class="btn primary">Enregistrer</button>
+        <button class="btn goto" data-go="scenario">Créer le scénario →</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Checklist</h2>
+      <p>☐ Histoire claire</p><p>☐ Téléphone chargé</p><p>☐ Stockage disponible</p><p>☐ Lieu calme / micro</p><p>☐ Lumière vérifiée</p>
+      <div class="tip"><b>Réglage conseillé</b><br>4K · 25 i/s · caméra arrière ×1 · plans stables.</div>
+    </div>
+  </div>
+</section>
+
+<section id="scenario" class="page">
+  <div class="hero"><h1>Scénario & plans</h1><p>Génère une structure de base depuis ton idée puis ajuste scène par scène.</p></div>
+  <div class="actions"><button id="generate" class="btn primary">✨ Générer 5 scènes</button><button id="addScene" class="btn">+ Ajouter une scène</button></div>
+  <div id="scenes"></div>
+</section>
+
+<section id="tournage" class="page">
+  <div class="hero"><h1>Plateau de tournage</h1><p>Autorise caméra et micro, choisis la scène, puis filme la prise.</p></div>
+  <div class="grid">
+    <div>
+      <div class="camera"><video id="cam" autoplay muted playsinline></video><div id="clap" class="clap"><b id="clapTxt">SCÈNE · PLAN · PRISE</b><div id="clapSub" class="muted"></div></div></div>
+      <div class="actions" style="justify-content:center">
+<button id="openCam" class="btn">📷 Caméra intégrée</button>
+<button id="nativeCamBtn" class="btn primary">📱 Filmer avec la caméra Samsung</button>
+<input id="nativeCamInput" type="file" accept="video/*" capture="environment" hidden>
+<button id="flip" class="btn">↺ Caméra</button>
+<button id="record" class="rec" disabled aria-label="Enregistrer"></button>
+</div>
+<div id="cameraHelp" class="tip" style="margin-top:10px">
+La caméra intégrée fonctionne sur une adresse HTTPS. Si tu ouvres ce fichier directement, utilise « Filmer avec la caméra Samsung ».
+</div>
+    </div>
+    <div class="card">
+      <h2>Clap numérique</h2>
+      <label class="label">Scène<select id="sceneSel"></select></label><br>
+      <label class="label">Plan<select id="shotSel"></select></label><br>
+      <label class="label">Prise<input id="takeNo" type="number" min="1" value="1"></label>
+      <div class="actions"><button id="showClap" class="btn">🎬 Clap</button></div>
+      <p id="instruction" class="tip">Crée d’abord ton scénario.</p>
+    </div>
+  </div>
+  <div class="card"><h2>Prises de la session</h2><div id="session"></div></div>
+</section>
+
+
+<section id="editeur" class="page">
+  <div class="hero">
+    <h1>Éditeur vidéo</h1>
+    <p>Choisis une prise puis découpe-la, modifie son rendu, ajoute du texte et exporte une nouvelle vidéo.</p>
+  </div>
+
+  <div class="card">
+    <label class="label">Clip à modifier
+      <select id="editClip"><option value="">Aucun rush</option></select>
+    </label>
+  </div>
+
+  <div class="editorGrid">
+    <div>
+      <div class="editorPreview">
+        <video id="editVideo" controls playsinline></video>
+        <div id="editTextOverlay" class="textOverlay"></div>
+      </div>
+      <div class="actions">
+        <button id="previewTrim" class="btn">▶️ Lire la sélection</button>
+        <button id="resetEdit" class="btn">↺ Réinitialiser</button>
+        <button id="exportEdit" class="btn primary">⬇️ Exporter la vidéo modifiée</button>
+      </div>
+      <div class="progress"><i id="exportProgress"></i></div>
+      <p id="editorStatus" class="editorStatus">Sélectionne un rush pour commencer.</p>
+    </div>
+
+    <div class="card controls">
+      <div class="control">
+        <div class="controlHead"><b>Découpage</b><span id="trimValue">0.0 s → 0.0 s</span></div>
+        <div class="rangeRow">
+          <label>Début<input id="trimStart" type="range" min="0" max="1" value="0" step="0.1"></label>
+          <label>Fin<input id="trimEnd" type="range" min="0" max="1" value="1" step="0.1"></label>
+        </div>
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Vitesse</b><span id="speedValue">1.00×</span></div>
+        <input id="speed" type="range" min="0.5" max="2" value="1" step="0.05">
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Volume</b><span id="volumeValue">100%</span></div>
+        <input id="volume" type="range" min="0" max="1" value="1" step="0.05">
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Luminosité</b><span id="brightnessValue">100%</span></div>
+        <input id="brightness" type="range" min="50" max="150" value="100" step="1">
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Contraste</b><span id="contrastValue">100%</span></div>
+        <input id="contrast" type="range" min="50" max="160" value="100" step="1">
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Saturation</b><span id="saturationValue">100%</span></div>
+        <input id="saturation" type="range" min="0" max="200" value="100" step="1">
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Rotation / miroir</b><span id="rotateValue">0°</span></div>
+        <div class="smallBtns">
+          <button class="btn rotateBtn" data-rot="0">0°</button>
+          <button class="btn rotateBtn" data-rot="90">90°</button>
+          <button class="btn rotateBtn" data-rot="180">180°</button>
+          <button class="btn rotateBtn" data-rot="270">270°</button>
+        </div>
+        <label style="display:flex;gap:8px;align-items:center;margin-top:10px;font-size:12px"><input id="mirror" type="checkbox" style="width:auto"> Miroir horizontal</label>
+      </div>
+
+      <div class="control">
+        <div class="controlHead"><b>Texte incrusté</b><span>optionnel</span></div>
+        <input id="overlayText" placeholder="Ex. Montpellier — 22h15">
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section id="montage" class="page">
+  <div class="hero">
+    <h1>Montage final</h1>
+    <p>Assemble plusieurs prises, règle chaque clip, ajoute des transitions, un générique et une musique, puis exporte le film.</p>
+  </div>
+
+  <div class="montageTop">
+    <div>
+      <div class="montagePreview">
+        <video id="montageVideo" controls playsinline></video>
+        <div id="previewTitle" class="previewTitle"></div>
+      </div>
+      <div class="actions">
+        <button id="undoMontage" class="btn" disabled>↶ Annuler</button>
+        <button id="redoMontage" class="btn" disabled>↷ Rétablir</button>
+        <button id="previewMontage" class="btn primary">▶️ Lire le montage</button>
+        <button id="stopPreview" class="btn">⏹ Arrêter</button>
+        <button id="exportMontage" class="btn primary">🎞️ Exporter le film</button>
+      </div>
+      <div class="progress"><i id="montageProgress"></i></div>
+      <p id="montageStatus" class="editorStatus">Ajoute des rushes à la timeline.</p>
+    </div>
+
+    <div class="card montageSettings">
+      <h2>Habillage du film</h2>
+      <label class="label">Titre d'ouverture<input id="introTitle" placeholder="Ex. LE DERNIER MÉTRO"></label>
+      <label class="label">Durée titre (s)<input id="introDuration" type="number" min="0" max="10" step="0.5" value="2"></label>
+      <label class="label">Générique de fin<textarea id="outroTitle" rows="4" placeholder="Réalisation : ...&#10;Avec : ..."></textarea></label>
+      <label class="label">Durée générique (s)<input id="outroDuration" type="number" min="0" max="15" step="0.5" value="3"></label>
+
+      <div class="audioRow">
+        <label class="label">Musique de fond<input id="musicInput" type="file" accept="audio/*"></label>
+        <button id="removeMusic" class="btn">Retirer</button>
+      </div>
+
+      <div id="musicEditor" class="musicEditor" style="display:none">
+        <div class="musicWave"><div id="musicSelection" class="musicSelection" style="left:0%;width:100%"></div></div>
+        <div class="musicInfo"><span id="musicDurationInfo">Durée : —</span></div>
+
+        <div class="musicEditorGrid">
+          <label>Début dans la musique (s)
+            <input id="musicTrimStart" type="number" min="0" step="0.1" value="0">
+          </label>
+          <label>Fin dans la musique (s)
+            <input id="musicTrimEnd" type="number" min="0.1" step="0.1" value="30">
+          </label>
+          <label>Démarrer dans le film à (s)
+            <input id="musicFilmStart" type="number" min="0" step="0.1" value="0">
+          </label>
+          <label>Vitesse musique
+            <select id="musicSpeed">
+              <option value="0.75">0,75×</option>
+              <option value="1" selected>1,00×</option>
+              <option value="1.25">1,25×</option>
+              <option value="1.5">1,50×</option>
+            </select>
+          </label>
+          <label>Fondu entrée (s)
+            <input id="musicFadeIn" type="number" min="0" max="10" step="0.1" value="1">
+          </label>
+          <label>Fondu sortie (s)
+            <input id="musicFadeOut" type="number" min="0" max="10" step="0.1" value="1">
+          </label>
+        </div>
+
+        <div class="musicMixRow">
+          <label>Volume musique
+            <input id="musicVolume" type="range" min="0" max="1" value="0.25" step="0.05">
+          </label>
+          <label>Volume son vidéo
+            <input id="videoMasterVolume" type="range" min="0" max="1" value="1" step="0.05">
+          </label>
+        </div>
+
+        <label style="display:flex;flex-direction:row;align-items:center;gap:8px;font-size:12px">
+          <input id="duckMusic" type="checkbox" style="width:auto"> Réduire automatiquement la musique pendant les dialogues/sons vidéo
+        </label>
+
+        <div class="actions" style="margin-top:4px">
+          <button id="testMusicSelection" class="btn primary">▶ Tester la sélection</button>
+          <button id="stopMusicTest" class="btn">⏹ Stop</button>
+        </div>
+      </div>
+
+      <div id="musicStatus" class="statusBox">Aucune musique.</div>
+      <div id="musicTrack" class="statusBox" style="display:none">
+        <b>🎵 Piste Musique</b>
+        <div id="musicTrackName" class="muted" style="margin-top:4px"></div>
+      </div>
+      <button id="saveMontageSettings" class="btn">💾 Sauvegarder les réglages</button>
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <div class="cardHead">
+      <div><span class="step">SCÈNES TOURNÉES</span><h2>Ajouter une scène enregistrée</h2></div>
+      <button id="addAllScenes" class="btn primary">+ Ajouter toutes les scènes</button>
+    </div>
+    <p class="muted">Les prises sont regroupées par scène. Choisis la meilleure prise, toutes les prises, ou coche uniquement celles que tu veux monter.</p>
+    <div id="recordedScenes" class="sceneLibrary"></div>
+  </div>
+
+<div class="card">
+    <div class="cardHead"><div><span class="step">RUSHES</span><h2>Bibliothèque</h2></div>
+      <button id="addFavorites" class="btn">⭐ Ajouter les favoris</button>
+    </div>
+    <div id="montageLibrary" class="libraryGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="cardHead"><div><span class="step">TIMELINE</span><h2>Ordre du film</h2></div>
+      <button id="clearTimeline" class="btn">Vider</button>
+    </div>
+    <div id="timeline" class="timeline"></div>
+  </div>
+
+  <div class="card">
+    <div class="cardHead">
+      <div><span class="step">OUTILS DE MONTAGE</span><h2>Modifier le clip sélectionné</h2></div>
+      <span id="selectedClipBadge" class="chip">Aucun clip sélectionné</span>
+    </div>
+    <div id="noClipTools" class="selectedHint">Appuie sur un clip dans la timeline pour afficher les outils de montage.</div>
+
+    <div id="clipToolsPanel" class="clipEditorPanel" style="display:none">
+      <div>
+        <div class="clipPreviewBox">
+          <video id="clipPreview" controls playsinline></video>
+          <div id="clipPreviewCaption" class="clipPreviewCaption"></div>
+        </div>
+        <div class="actions">
+          <button id="previewSelectedClip" class="btn primary">▶️ Aperçu du clip</button>
+          <button id="setStartAtPlayhead" class="btn">✂️ Début ici</button>
+          <button id="splitAtPlayhead" class="btn">✂️ Scinder ici</button>
+          <button id="setEndAtPlayhead" class="btn">✂️ Fin ici</button>
+        </div>
+        <div class="miniProgress"><i id="clipMiniProgress"></i></div>
+      </div>
+
+      <div class="toolPanel">
+        <h2 id="toolClipTitle">Clip</h2>
+        <div id="toolClipMeta" class="muted"></div>
+
+        <div class="toolGrid">
+          <div class="toolGroup">
+            <h3>✂️ Couper</h3>
+            <label>Début
+              <input id="toolStart" type="number" min="0" step="0.1">
+            </label>
+            <label>Fin
+              <input id="toolEnd" type="number" min="0.1" step="0.1">
+            </label>
+            <div class="toolReadout"><span>Durée utile</span><b id="toolDuration">0 s</b></div>
+          </div>
+
+          <div class="toolGroup">
+            <h3>⏱️ Vitesse & son</h3>
+            <label>Vitesse
+              <input id="toolSpeed" type="range" min="0.25" max="2" value="1" step="0.05">
+            </label>
+            <div class="toolReadout"><span>Lecture</span><b id="toolSpeedVal">1.00×</b></div>
+            <label>Volume du clip
+              <input id="toolVolume" type="range" min="0" max="1" value="1" step="0.05">
+            </label>
+            <div class="toolReadout"><span>Volume</span><b id="toolVolumeVal">100%</b></div>
+          </div>
+
+          <div class="toolGroup">
+            <h3>🎨 Image</h3>
+            <label>Luminosité<input id="toolBrightness" type="range" min="50" max="160" value="100" step="1"></label>
+            <div class="toolReadout"><span></span><b id="toolBrightnessVal">100%</b></div>
+            <label>Contraste<input id="toolContrast" type="range" min="50" max="180" value="100" step="1"></label>
+            <div class="toolReadout"><span></span><b id="toolContrastVal">100%</b></div>
+            <label>Saturation<input id="toolSaturation" type="range" min="0" max="220" value="100" step="1"></label>
+            <div class="toolReadout"><span></span><b id="toolSaturationVal">100%</b></div>
+          </div>
+
+          <div class="toolGroup">
+            <h3>🔄 Cadrage</h3>
+            <label>Rotation
+              <select id="toolRotation">
+                <option value="0">0°</option><option value="90">90°</option>
+                <option value="180">180°</option><option value="270">270°</option>
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:row;align-items:center;gap:8px">
+              <input id="toolMirror" type="checkbox" style="width:auto"> Miroir horizontal
+            </label>
+          </div>
+
+          <div class="toolGroup">
+            <h3>💬 Texte</h3>
+            <label>Texte sur ce plan<input id="toolCaption" placeholder="Ajouter un texte..."></label>
+            <label>Transition
+              <select id="toolTransition">
+                <option value="none">Aucune</option>
+                <option value="fadeBlack">Fondu noir</option>
+                <option value="fadeWhite">Fondu blanc</option>
+                <option value="zoom">Zoom</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="toolGroup">
+            <h3>⚡ Actions</h3>
+            <div class="toolButtons">
+              <button id="duplicateClip" class="btn">Dupliquer</button>
+              <button id="resetClip" class="btn">Réinitialiser</button>
+              <button id="deleteSelectedClip" class="btn">Supprimer</button>
+            </div>
+          </div>
+        </div>
+
+        <button id="applyClipTools" class="btn primary" style="width:100%;margin-top:12px">✓ Appliquer au clip</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cardHead"><div><span class="step">PROJET</span><h2>Sauvegarde</h2></div></div>
+    <div class="actions">
+      <button id="exportJson" class="btn">⬇️ Exporter le projet</button>
+      <button id="clearAll" class="btn">Supprimer tous les rushes</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const K='pocket_real_v2'; let stream, rec, chunks=[], facing='environment';
+const $=id=>document.getElementById(id), uid=()=>crypto.randomUUID();
+const get=()=>JSON.parse(localStorage.getItem(K)||'{"title":"","genre":"Drame","duration":"5 min","actors":2,"locations":"","idea":"","scenes":[]}');
+const set=p=>localStorage.setItem(K,JSON.stringify(p)); let P=get();
+
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+document.querySelectorAll('.goto').forEach(b=>b.onclick=()=>tab(b.dataset.go));
+function tab(id){document.querySelectorAll('.page,.tabs button').forEach(x=>x.classList.remove('on'));$(id).classList.add('on');document.querySelector('[data-tab="'+id+'"]').classList.add('on');if(id==='tournage')fillShoot();if(id==='editeur')initEditor();if(id==='montage')initMontage();if(id==='projet')refreshKPIs()}
+['title','genre','duration','actors','locations','idea'].forEach(k=>$(k).value=P[k]||'');
+$('save').onclick=()=>{['title','genre','duration','actors','locations','idea'].forEach(k=>P[k]=$(k).value);set(P);refreshKPIs();alert('Projet enregistré')};
+
+function shotList(){return[
+{id:uid(),type:'Plan large',txt:'Situe le lieu et les personnages, 5 à 8 secondes.'},
+{id:uid(),type:'Plan moyen',txt:'Cadre le personnage de la taille à la tête.'},
+{id:uid(),type:'Gros plan',txt:'Capture une émotion ou une réaction importante.'},
+{id:uid(),type:'Plan de coupe',txt:'Filme un détail : objet, mains, décor.'}]}
+
+function gen(){
+  P=get(); let l=(P.locations||'Lieu principal').split(',').map(x=>x.trim()).filter(Boolean);
+  let idea=P.idea||'Un personnage découvre un événement inattendu.';
+  let base=[['Mise en place','On découvre le personnage et sa situation. '+idea],['Déclencheur','Un événement force le personnage à agir.'],['Confrontation','L’obstacle principal apparaît et complique la situation.'],['Bascule','Une information ou un choix change le sens de l’histoire.'],['Résolution','Le personnage agit et l’histoire se conclut par une image forte.']];
+  P.scenes=base.map((x,i)=>({id:uid(),title:x[0],place:l[i%Math.max(l.length,1)]||'Lieu principal',time:i===3?'INT. NUIT':'INT. JOUR',action:x[1],shots:shotList()}));
+  set(P); renderScenes(); refreshKPIs()
+}
+$('generate').onclick=gen;
+$('addScene').onclick=()=>{P=get();P.scenes.push({id:uid(),title:'Nouvelle scène',place:'Lieu',time:'INT. JOUR',action:'Décris ici ce qui se passe.',shots:shotList()});set(P);renderScenes();refreshKPIs()};
+
+function renderScenes(){
+  P=get();
+  $('scenes').innerHTML=P.scenes.length?P.scenes.map((s,i)=>'<div class="scene"><h3>'+(i+1)+'. '+s.title+'</h3><small>'+s.time+' · '+s.place+'</small><p>'+s.action+'</p><div class="chips">'+s.shots.map(x=>'<span class="chip">🎥 '+x.type+'</span>').join('')+'</div><div class="actions"><button class="btn del" data-id="'+s.id+'">Supprimer</button></div></div>').join(''):'<div class="empty">Aucune scène pour le moment.</div>';
+  document.querySelectorAll('.del').forEach(b=>b.onclick=()=>{P.scenes=P.scenes.filter(s=>s.id!==b.dataset.id);set(P);renderScenes();refreshKPIs()})
+}
+renderScenes();
+
+async function db(){return new Promise((r,j)=>{let q=indexedDB.open('PocketRealisateur',2);q.onupgradeneeded=()=>{if(!q.result.objectStoreNames.contains('takes'))q.result.createObjectStore('takes',{keyPath:'id'});if(!q.result.objectStoreNames.contains('assets'))q.result.createObjectStore('assets',{keyPath:'id'})};q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error)})}
+async function allTakes(){let d=await db();return new Promise(r=>{let q=d.transaction('takes').objectStore('takes').getAll();q.onsuccess=()=>r(q.result.sort((a,b)=>b.created-a.created))})}
+async function putTake(t){let d=await db();return new Promise(r=>{let q=d.transaction('takes','readwrite').objectStore('takes').put(t);q.onsuccess=()=>r()})}
+async function delTake(id){let d=await db();return new Promise(r=>{let q=d.transaction('takes','readwrite').objectStore('takes').delete(id);q.onsuccess=()=>r()})}
+
+
+async function putAsset(a){let d=await db();return new Promise(r=>{let q=d.transaction('assets','readwrite').objectStore('assets').put(a);q.onsuccess=()=>r()})}
+async function getAsset(id){let d=await db();return new Promise(r=>{let q=d.transaction('assets').objectStore('assets').get(id);q.onsuccess=()=>r(q.result||null)})}
+async function delAsset(id){let d=await db();return new Promise(r=>{let q=d.transaction('assets','readwrite').objectStore('assets').delete(id);q.onsuccess=()=>r()})}
+
+async function camera(){
+  if(!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    throw new Error("La caméra intégrée nécessite une adresse HTTPS. Utilise le bouton « Filmer avec la caméra Samsung » ci-dessous.");
+  }
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=await navigator.mediaDevices.getUserMedia({
+    video:{facingMode:{ideal:facing}},
+    audio:true
+  });
+  $('cam').srcObject=stream;
+  $('record').disabled=false;
+  $('cameraHelp').textContent='Caméra intégrée prête. Tu peux enregistrer directement dans Pocket Réalisateur.';
+}
+$('openCam').onclick=()=>camera().catch(e=>{
+  $('cameraHelp').textContent=e.message;
+  alert(e.message);
+});
+$('flip').onclick=()=>{facing=facing==='environment'?'user':'environment';camera().catch(()=>{})};
+
+function fillShoot(){
+  P=get();
+  $('sceneSel').innerHTML=P.scenes.map((s,i)=>'<option value="'+s.id+'">'+(i+1)+'. '+s.title+'</option>').join('')||'<option>Aucune scène</option>';
+  fillShots(); renderSession()
+}
+function fillShots(){
+  let s=P.scenes.find(x=>x.id===$('sceneSel').value)||P.scenes[0];
+  $('shotSel').innerHTML=s?(s.shots||[]).map((x,i)=>'<option value="'+x.id+'">'+(i+1)+'. '+x.type+'</option>').join(''):'<option>Aucun plan</option>';
+  showInstruction()
+}
+function showInstruction(){
+  let s=P.scenes.find(x=>x.id===$('sceneSel').value), sh=s?.shots.find(x=>x.id===$('shotSel').value);
+  $('instruction').textContent=sh?.txt||'Crée d’abord ton scénario.'
+}
+$('sceneSel').onchange=fillShots; $('shotSel').onchange=showInstruction;
+$('showClap').onclick=()=>{
+  let s=P.scenes.find(x=>x.id===$('sceneSel').value), si=P.scenes.findIndex(x=>x.id===s?.id), ji=s?.shots.findIndex(x=>x.id===$('shotSel').value);
+  $('clapTxt').textContent='SCÈNE '+(si+1)+' · PLAN '+(ji+1)+' · PRISE '+$('takeNo').value;
+  $('clapSub').textContent=P.title||'Pocket Réalisateur'; $('clap').classList.add('on'); setTimeout(()=>$('clap').classList.remove('on'),2200)
+};
+
+
+$('nativeCamBtn').onclick=()=>$('nativeCamInput').click();
+
+$('nativeCamInput').onchange=async(e)=>{
+  const file=e.target.files && e.target.files[0];
+  if(!file) return;
+
+  P=get();
+  let s=P.scenes.find(x=>x.id===$('sceneSel').value) || P.scenes[0];
+  let sh=s?.shots?.find(x=>x.id===$('shotSel').value);
+  let takeNumber=+$('takeNo').value||1;
+
+  await putTake({
+    id:uid(),
+    sceneId:s?.id||'',
+    scene:s?.title||'Sans scène',
+    shot:sh?.type||'Plan libre',
+    take:takeNumber,
+    fav:false,
+    created:Date.now(),
+    blob:file
+  });
+
+  $('takeNo').value=takeNumber+1;
+  $('cameraHelp').textContent='Vidéo importée depuis la caméra Samsung.';
+  $('nativeCamInput').value='';
+  renderSession();
+  refreshKPIs();
+};
+
+$('record').onclick=async()=>{
+  if(rec&&rec.state==='recording'){rec.stop();return}
+  if(!stream)await camera();
+  chunks=[]; rec=new MediaRecorder(stream);
+  rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+  rec.onstop=async()=>{
+    let s=P.scenes.find(x=>x.id===$('sceneSel').value), sh=s?.shots.find(x=>x.id===$('shotSel').value), blob=new Blob(chunks,{type:rec.mimeType});
+    await putTake({id:uid(),sceneId:s?.id||'',scene:s?.title||'Sans scène',shot:sh?.type||'Plan libre',take:+$('takeNo').value||1,fav:false,created:Date.now(),blob});
+    $('takeNo').value=+$('takeNo').value+1; $('record').classList.remove('on'); renderSession(); refreshKPIs()
+  };
+  rec.start(400); $('record').classList.add('on')
+};
+
+function takeHtml(t){return '<div class="take" data-t="'+t.id+'"><video controls playsinline></video><div><b class="'+(t.fav?'fav':'')+'">'+(t.fav?'★ ':'')+t.scene+'</b><p class="muted">'+t.shot+' · prise '+t.take+'</p><div class="actions"><button class="btn favBtn">☆ / ★</button><button class="btn down">Télécharger</button><button class="btn rem">Supprimer</button></div></div></div>'}
+async function wire(root){
+  let a=await allTakes();
+  root.querySelectorAll('[data-t]').forEach(c=>{
+    let t=a.find(x=>x.id===c.dataset.t), v=c.querySelector('video'); v.src=URL.createObjectURL(t.blob);
+    c.querySelector('.favBtn').onclick=async()=>{t.fav=!t.fav;await putTake(t);root.id==='rushes'?renderRushes():renderSession()};
+    c.querySelector('.down').onclick=()=>download(t.blob,(t.scene+'-'+t.shot+'-'+t.take+'.webm').replace(/\s+/g,'-'));
+    c.querySelector('.rem').onclick=async()=>{await delTake(t.id);root.id==='rushes'?renderRushes():renderSession();refreshKPIs()}
+  })
+}
+async function renderSession(){let a=await allTakes();$('session').innerHTML=a.slice(0,5).map(takeHtml).join('')||'<div class="empty">Aucune prise.</div>';wire($('session'))}
+async function renderRushes(){let a=await allTakes();$('rushes').innerHTML='<h2>'+a.length+' rush'+(a.length>1?'es':'')+'</h2>'+(a.map(takeHtml).join('')||'<div class="empty">Aucune prise enregistrée.</div>');wire($('rushes'))}
+function download(b,n){let a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+
+let EDIT={take:null,url:null,rotation:0};
+
+async function initEditor(){
+  const takes=await allTakes();
+  $('editClip').innerHTML=takes.length
+    ? '<option value="">Choisir une prise...</option>'+takes.map(t=>'<option value="'+t.id+'">'+t.scene+' — '+t.shot+' — prise '+t.take+'</option>').join('')
+    : '<option value="">Aucun rush disponible</option>';
+  $('editorStatus').textContent=takes.length?'Choisis un rush à modifier.':'Aucun rush : filme ou importe une vidéo dans Tournage.';
+}
+
+$('editClip').onchange=async()=>{
+  const takes=await allTakes();
+  EDIT.take=takes.find(t=>t.id===$('editClip').value)||null;
+  if(EDIT.url){URL.revokeObjectURL(EDIT.url);EDIT.url=null}
+  if(!EDIT.take){
+    $('editVideo').removeAttribute('src'); $('editVideo').load(); $('editorStatus').textContent='Choisis un rush à modifier.'; return;
+  }
+  EDIT.url=URL.createObjectURL(EDIT.take.blob);
+  const v=$('editVideo'); v.src=EDIT.url; v.load();
+  v.onloadedmetadata=()=>{
+    const d=Math.max(0.1,v.duration||0.1);
+    $('trimStart').max=d; $('trimEnd').max=d; $('trimStart').value=0; $('trimEnd').value=d;
+    $('editorStatus').textContent='Clip chargé : '+d.toFixed(1)+' s';
+    resetEditorControls(false); updateEditorPreview();
+  }
+};
+
+function resetEditorControls(resetTrim=true){
+  $('speed').value=1; $('volume').value=1; $('brightness').value=100; $('contrast').value=100; $('saturation').value=100;
+  $('mirror').checked=false; $('overlayText').value=''; EDIT.rotation=0;
+  if(resetTrim && $('editVideo').duration){$('trimStart').value=0;$('trimEnd').value=$('editVideo').duration}
+  updateEditorPreview();
+}
+$('resetEdit').onclick=()=>resetEditorControls(true);
+
+function editorFilter(){
+  return 'brightness('+$('brightness').value+'%) contrast('+$('contrast').value+'%) saturate('+$('saturation').value+'%)';
+}
+function updateEditorPreview(){
+  const v=$('editVideo');
+  v.style.filter=editorFilter();
+  v.style.transform='rotate('+EDIT.rotation+'deg) scaleX('+($('mirror').checked?-1:1)+')';
+  v.playbackRate=+$('speed').value;
+  v.volume=+$('volume').value;
+  $('editTextOverlay').textContent=$('overlayText').value;
+  $('trimValue').textContent=(+$('trimStart').value).toFixed(1)+' s → '+(+$('trimEnd').value).toFixed(1)+' s';
+  $('speedValue').textContent=(+$('speed').value).toFixed(2)+'×';
+  $('volumeValue').textContent=Math.round(+$('volume').value*100)+'%';
+  $('brightnessValue').textContent=$('brightness').value+'%';
+  $('contrastValue').textContent=$('contrast').value+'%';
+  $('saturationValue').textContent=$('saturation').value+'%';
+  $('rotateValue').textContent=EDIT.rotation+'°';
+}
+['trimStart','trimEnd','speed','volume','brightness','contrast','saturation','mirror','overlayText'].forEach(id=>{
+  $(id).addEventListener(id==='overlayText'?'input':'change',()=>{
+    if(+$('trimStart').value>+$('trimEnd').value-0.1){
+      if(id==='trimStart')$('trimStart').value=Math.max(0,+$('trimEnd').value-0.1);
+      else $('trimEnd').value=Math.min(+$('trimEnd').max,+$('trimStart').value+0.1);
+    }
+    updateEditorPreview()
+  });
+  if(id!=='mirror')$(id).addEventListener('input',updateEditorPreview);
+});
+document.querySelectorAll('.rotateBtn').forEach(b=>b.onclick=()=>{EDIT.rotation=+b.dataset.rot;updateEditorPreview()});
+
+$('previewTrim').onclick=async()=>{
+  const v=$('editVideo'); if(!EDIT.take)return alert('Choisis un rush.');
+  const start=+$('trimStart').value,end=+$('trimEnd').value;
+  v.currentTime=start;v.playbackRate=+$('speed').value;v.volume=+$('volume').value;
+  if(previewMusicEl&&M.duckMusic&&!previewMusicEl.paused)previewMusicEl.volume=(M.musicVolume??0)*0.35;
+    await v.play().catch(()=>{});
+  const stop=()=>{if(v.currentTime>=end){v.pause();v.removeEventListener('timeupdate',stop)}};
+  v.addEventListener('timeupdate',stop);
+};
+
+function bestRecorderMime(){
+  const list=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  return list.find(x=>MediaRecorder.isTypeSupported(x))||'';
+}
+
+$('exportEdit').onclick=async()=>{
+  if(!EDIT.take)return alert('Choisis un rush à modifier.');
+  if(!HTMLCanvasElement.prototype.captureStream || typeof MediaRecorder==='undefined'){
+    alert("Ce navigateur ne permet pas encore l'export vidéo intégré. Les réglages restent disponibles en aperçu.");
+    return;
+  }
+
+  const start=+$('trimStart').value, end=+$('trimEnd').value;
+  if(end<=start+0.05)return alert('La fin doit être après le début.');
+  const speed=+$('speed').value, volume=+$('volume').value;
+  const brightness=+$('brightness').value, contrast=+$('contrast').value, saturation=+$('saturation').value;
+  const rotation=EDIT.rotation, mirror=$('mirror').checked, text=$('overlayText').value.trim();
+
+  $('exportEdit').disabled=true;
+  $('editorStatus').textContent='Préparation de l’export…';
+  $('exportProgress').style.width='0%';
+
+  const exp=document.createElement('video');
+  exp.src=URL.createObjectURL(EDIT.take.blob);
+  exp.playsInline=true; exp.preload='auto';
+  exp.volume=volume; exp.playbackRate=speed;
+
+  await new Promise((resolve,reject)=>{
+    exp.onloadedmetadata=resolve;
+    exp.onerror=()=>reject(new Error('Impossible de charger la vidéo pour l’export.'));
+  });
+
+  exp.currentTime=start;
+  await new Promise(resolve=>{exp.onseeked=resolve; setTimeout(resolve,800)});
+
+  const sourceW=exp.videoWidth||1280, sourceH=exp.videoHeight||720;
+  const rotateQuarter=rotation===90||rotation===270;
+  const canvas=document.createElement('canvas');
+  canvas.width=rotateQuarter?sourceH:sourceW;
+  canvas.height=rotateQuarter?sourceW:sourceH;
+  const ctx=canvas.getContext('2d');
+
+  const out=canvas.captureStream(30);
+  let audioAdded=false;
+  try{
+    if(typeof exp.captureStream==='function'){
+      const captured=exp.captureStream();
+      captured.getAudioTracks().forEach(tr=>{out.addTrack(tr);audioAdded=true});
+    } else if(typeof exp.mozCaptureStream==='function'){
+      const captured=exp.mozCaptureStream();
+      captured.getAudioTracks().forEach(tr=>{out.addTrack(tr);audioAdded=true});
+    }
+  }catch(e){}
+
+  const mime=bestRecorderMime();
+  const mr=mime?new MediaRecorder(out,{mimeType:mime}):new MediaRecorder(out);
+  const parts=[];
+  mr.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+
+  const done=new Promise(resolve=>mr.onstop=resolve);
+  mr.start(250);
+
+  function drawFrame(){
+    if(exp.paused || exp.ended || exp.currentTime>=end){
+      if(exp.currentTime>=end && !exp.paused)exp.pause();
+      return;
+    }
+    ctx.save();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.filter='brightness('+brightness+'%) contrast('+contrast+'%) saturate('+saturation+'%)';
+    ctx.translate(canvas.width/2,canvas.height/2);
+    ctx.rotate(rotation*Math.PI/180);
+    ctx.scale(mirror?-1:1,1);
+    ctx.drawImage(exp,-sourceW/2,-sourceH/2,sourceW,sourceH);
+    ctx.restore();
+
+    if(text){
+      ctx.save();
+      ctx.filter='none';
+      const fs=Math.max(28,Math.round(canvas.width*0.045));
+      ctx.font='900 '+fs+'px system-ui, sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.lineWidth=Math.max(4,fs*.16);ctx.strokeStyle='rgba(0,0,0,.85)';ctx.fillStyle='white';
+      const x=canvas.width/2,y=canvas.height*.86;
+      ctx.strokeText(text,x,y,canvas.width*.84);ctx.fillText(text,x,y,canvas.width*.84);
+      ctx.restore();
+    }
+
+    const pct=Math.max(0,Math.min(100,((exp.currentTime-start)/(end-start))*100));
+    $('exportProgress').style.width=pct.toFixed(1)+'%';
+    $('editorStatus').textContent='Export '+Math.round(pct)+'%'+(audioAdded?'':' · audio non garanti sur ce navigateur');
+    requestAnimationFrame(drawFrame);
+  }
+
+  const stopExport=()=>{if(mr.state==='recording')mr.stop()};
+  exp.addEventListener('timeupdate',()=>{if(exp.currentTime>=end){exp.pause();stopExport()}});
+  exp.addEventListener('ended',stopExport);
+
+  try{
+    await exp.play();
+    requestAnimationFrame(drawFrame);
+    const realMs=((end-start)/speed)*1000+1200;
+    setTimeout(stopExport,realMs);
+    await done;
+
+    const blob=new Blob(parts,{type:mr.mimeType||'video/webm'});
+    const base=(EDIT.take.scene+'-'+EDIT.take.shot+'-prise-'+EDIT.take.take+'-modifiee.webm').replace(/\s+/g,'-');
+    download(blob,base);
+    $('exportProgress').style.width='100%';
+    $('editorStatus').textContent='Export terminé'+(audioAdded?' avec audio.':' — vérifie l’audio du fichier sur ton Samsung.');
+  }catch(err){
+    $('editorStatus').textContent='Échec de l’export : '+err.message;
+    alert('Export impossible : '+err.message);
+  }finally{
+    try{URL.revokeObjectURL(exp.src)}catch(e){}
+    $('exportEdit').disabled=false;
+  }
+};
+
+
+
+const MKEY='pocket_montage_v1';
+const montageDefaults={clips:[],introTitle:'',introDuration:2,outroTitle:'',outroDuration:3,musicVolume:.25,musicName:'',musicTrimStart:0,musicTrimEnd:30,musicFilmStart:0,musicFadeIn:1,musicFadeOut:1,musicSpeed:1,videoMasterVolume:1,duckMusic:false,musicDuration:0};
+const getMontage=()=>{try{return {...montageDefaults,...JSON.parse(localStorage.getItem(MKEY)||'{}')}}catch{return {...montageDefaults}}};
+const saveMontage=m=>localStorage.setItem(MKEY,JSON.stringify(m));
+
+let M=getMontage(), previewAbort=false;
+let previewMusicEl=null, musicTestEl=null;
+let undoStack=[], redoStack=[], historyLock=false;
+
+function cloneMontageState(){
+  return JSON.parse(JSON.stringify(getMontage()));
+}
+function updateHistoryButtons(){
+  const u=$('undoMontage'),r=$('redoMontage');
+  if(u)u.disabled=undoStack.length===0;
+  if(r)r.disabled=redoStack.length===0;
+}
+function pushHistory(){
+  if(historyLock)return;
+  undoStack.push(cloneMontageState());
+  if(undoStack.length>50)undoStack.shift();
+  redoStack=[];
+  updateHistoryButtons();
+}
+async function applyHistoryState(state){
+  historyLock=true;
+  saveMontage(JSON.parse(JSON.stringify(state)));
+  M=getMontage();
+  await renderTimeline();
+  await renderRecordedScenes();
+  await renderMontageLibrary();
+  if(M.clips.length){
+    const id=(selectedClipId && M.clips.some(x=>x.id===selectedClipId))?selectedClipId:M.clips[0].id;
+    await selectTimelineClip(id);
+  }else{
+    selectedClipId=null;
+    $('clipToolsPanel').style.display='none';
+    $('noClipTools').style.display='block';
+    $('selectedClipBadge').textContent='Aucun clip sélectionné';
+  }
+  historyLock=false;
+  updateHistoryButtons();
+}
+$('undoMontage').onclick=async()=>{
+  if(!undoStack.length)return;
+  redoStack.push(cloneMontageState());
+  const prev=undoStack.pop();
+  await applyHistoryState(prev);
+  $('montageStatus').textContent='Dernière modification annulée.';
+};
+$('redoMontage').onclick=async()=>{
+  if(!redoStack.length)return;
+  undoStack.push(cloneMontageState());
+  const next=redoStack.pop();
+  await applyHistoryState(next);
+  $('montageStatus').textContent='Modification rétablie.';
+};
+
+
+async function initMontage(){
+  M=getMontage();
+  updateHistoryButtons();
+  $('introTitle').value=M.introTitle||'';
+  $('introDuration').value=M.introDuration??2;
+  $('outroTitle').value=M.outroTitle||'';
+  $('outroDuration').value=M.outroDuration??3;
+  $('musicVolume').value=M.musicVolume??.25;
+  $('musicTrimStart').value=M.musicTrimStart??0;
+  $('musicTrimEnd').value=M.musicTrimEnd??30;
+  $('musicFilmStart').value=M.musicFilmStart??0;
+  $('musicFadeIn').value=M.musicFadeIn??1;
+  $('musicFadeOut').value=M.musicFadeOut??1;
+  $('musicSpeed').value=String(M.musicSpeed??1);
+  $('videoMasterVolume').value=M.videoMasterVolume??1;
+  $('duckMusic').checked=!!M.duckMusic;
+  const music=await getAsset('music');
+  $('musicStatus').textContent=music?'✅ Musique prête : '+(M.musicName||music.name||'Musique chargée'):'Aucune musique.';
+  $('musicTrack').style.display=music?'block':'none';
+  $('musicEditor').style.display=music?'grid':'none';
+  $('musicTrackName').textContent=music?(M.musicName||music.name||'Musique chargée'):'';
+  $('musicTrack').classList.toggle('musicActive',!!music);
+  if(music){await refreshMusicMetadata(music);updateMusicSelectionUI();}
+  await renderRecordedScenes();
+  await renderMontageLibrary();
+  await renderTimeline();
+  if(M.clips.length && !selectedClipId) await selectTimelineClip(M.clips[0].id);
+}
+function saveMontageInputs(){
+  M=getMontage();
+  M.introTitle=$('introTitle').value;
+  M.introDuration=Math.max(0,+$('introDuration').value||0);
+  M.outroTitle=$('outroTitle').value;
+  M.outroDuration=Math.max(0,+$('outroDuration').value||0);
+  M.musicVolume=+$('musicVolume').value||0;
+  M.musicTrimStart=Math.max(0,+$('musicTrimStart').value||0);
+  M.musicTrimEnd=Math.max(M.musicTrimStart+.1,+$('musicTrimEnd').value||M.musicTrimStart+.1);
+  M.musicFilmStart=Math.max(0,+$('musicFilmStart').value||0);
+  M.musicFadeIn=Math.max(0,+$('musicFadeIn').value||0);
+  M.musicFadeOut=Math.max(0,+$('musicFadeOut').value||0);
+  M.musicSpeed=Math.max(.5,+$('musicSpeed').value||1);
+  M.videoMasterVolume=Math.max(0,Math.min(1,+$('videoMasterVolume').value||0));
+  M.duckMusic=$('duckMusic').checked;
+  saveMontage(M);
+}
+$('saveMontageSettings').onclick=()=>{pushHistory();saveMontageInputs();$('montageStatus').textContent='Réglages du montage sauvegardés.'};$('musicVolume').oninput=saveMontageInputs;
+['musicTrimStart','musicTrimEnd','musicFilmStart','musicFadeIn','musicFadeOut','musicSpeed','videoMasterVolume','duckMusic'].forEach(id=>{
+  $(id).addEventListener('change',()=>{saveMontageInputs();updateMusicSelectionUI()});
+  $(id).addEventListener('input',()=>{if(id!=='duckMusic'){saveMontageInputs();updateMusicSelectionUI()}})
+});
+
+
+
+async function refreshMusicMetadata(asset){
+  return new Promise(resolve=>{
+    const a=document.createElement('audio');
+    const u=URL.createObjectURL(asset.blob);
+    a.preload='metadata';a.src=u;
+    a.onloadedmetadata=()=>{
+      const d=isFinite(a.duration)?a.duration:0;
+      M=getMontage();M.musicDuration=d;
+      if(!M.musicTrimEnd || M.musicTrimEnd>d)M.musicTrimEnd=d||30;
+      if(M.musicTrimStart>=M.musicTrimEnd)M.musicTrimStart=0;
+      saveMontage(M);
+      $('musicDurationInfo').textContent='Durée : '+(d?d.toFixed(1)+' s':'inconnue');
+      $('musicTrimStart').max=d||9999;
+      $('musicTrimEnd').max=d||9999;
+      $('musicTrimStart').value=M.musicTrimStart;
+      $('musicTrimEnd').value=M.musicTrimEnd;
+      URL.revokeObjectURL(u);resolve(d)
+    };
+    a.onerror=()=>{URL.revokeObjectURL(u);resolve(0)}
+  })
+}
+function updateMusicSelectionUI(){
+  M=getMontage();
+  const d=M.musicDuration||Math.max(M.musicTrimEnd||1,1);
+  let s=Math.max(0,Math.min(d,M.musicTrimStart||0));
+  let e=Math.max(s+.1,Math.min(d,M.musicTrimEnd||d));
+  const left=(s/d)*100, width=((e-s)/d)*100;
+  $('musicSelection').style.left=left+'%';
+  $('musicSelection').style.width=width+'%';
+  $('musicDurationInfo').textContent='Durée : '+(d?d.toFixed(1)+' s':'—')+' · sélection : '+(e-s).toFixed(1)+' s';
+}
+
+$('musicInput').onchange=async e=>{
+  const f=e.target.files?.[0]; if(!f)return;
+  pushHistory();
+  await putAsset({id:'music',name:f.name,type:f.type,blob:f});
+  M=getMontage();M.musicName=f.name;saveMontage(M);
+  await refreshMusicMetadata({id:'music',name:f.name,type:f.type,blob:f});
+  M=getMontage();
+  $('musicStatus').textContent='✅ Musique prête : '+f.name;
+  $('musicTrack').style.display='block';
+  $('musicEditor').style.display='grid';
+  $('musicTrackName').textContent=f.name;
+  $('musicTrack').classList.add('musicActive');
+  $('musicInput').value='';
+  updateMusicSelectionUI();
+};
+$('removeMusic').onclick=async()=>{pushHistory();await delAsset('music');M=getMontage();M.musicName='';saveMontage(M);$('musicStatus').textContent='Aucune musique.';$('musicTrack').style.display='none';$('musicEditor').style.display='none';$('musicTrack').classList.remove('musicActive');if(musicTestEl){musicTestEl.pause();musicTestEl=null}if(previewMusicEl){previewMusicEl.pause();previewMusicEl=null}};
+
+
+async function renderRecordedScenes(){
+  const takes=await allTakes();
+  const grouped=new Map();
+  takes.forEach(t=>{
+    const key=t.sceneId||('name:'+t.scene);
+    if(!grouped.has(key)) grouped.set(key,{sceneId:t.sceneId||'',scene:t.scene||'Sans scène',takes:[]});
+    grouped.get(key).takes.push(t);
+  });
+
+  if(!grouped.size){
+    $('recordedScenes').innerHTML='<div class="empty">Aucune scène tournée. Filme d’abord dans l’onglet Tournage.</div>';
+    return;
+  }
+
+  $('recordedScenes').innerHTML=[...grouped.values()].map((g,idx)=>{
+    const favCount=g.takes.filter(t=>t.fav).length;
+    return `<article class="recordedScene" data-scene-key="${(g.sceneId||g.scene).replace(/"/g,'&quot;')}">
+      <div class="recordedSceneHead">
+        <div><h3>🎬 ${g.scene}</h3><small>${g.takes.length} prise${g.takes.length>1?'s':''}${favCount?' · '+favCount+' favorite'+(favCount>1?'s':''):''}</small></div>
+        <span class="chip">Scène ${idx+1}</span>
+      </div>
+      <div class="sceneTakes">
+        ${g.takes.map(t=>`<label class="sceneTake">
+          <input type="checkbox" class="sceneTakeCheck" value="${t.id}">
+          <span>${t.fav?'★ ':''}${t.shot} · prise ${t.take}</span>
+        </label>`).join('')}
+      </div>
+      <div class="sceneActions">
+        <button class="btn addBestScene" data-scene="${g.sceneId||''}" data-name="${g.scene.replace(/"/g,'&quot;')}">⭐ Ajouter la meilleure prise</button>
+        <button class="btn addSelectedScene" data-scene="${g.sceneId||''}" data-name="${g.scene.replace(/"/g,'&quot;')}">✓ Ajouter la sélection</button>
+        <button class="btn addWholeScene" data-scene="${g.sceneId||''}" data-name="${g.scene.replace(/"/g,'&quot;')}">+ Ajouter toutes les prises</button>
+      </div>
+    </article>`
+  }).join('');
+
+  document.querySelectorAll('.addBestScene').forEach(btn=>btn.onclick=async()=>{
+    const all=await allTakes();
+    const candidates=all.filter(t=>btn.dataset.scene ? t.sceneId===btn.dataset.scene : t.scene===btn.dataset.name);
+    if(!candidates.length)return;
+    pushHistory();
+    const chosen=candidates.find(t=>t.fav)||candidates[0];
+    await addTakeToTimeline(chosen);
+    $('montageStatus').textContent='Scène ajoutée avec la meilleure prise : '+chosen.scene;
+  });
+
+  document.querySelectorAll('.addWholeScene').forEach(btn=>btn.onclick=async()=>{
+    const all=await allTakes();
+    const candidates=all.filter(t=>btn.dataset.scene ? t.sceneId===btn.dataset.scene : t.scene===btn.dataset.name);
+    pushHistory();
+    for(const t of candidates) await addTakeToTimeline(t,false);
+    await renderTimeline();
+    $('montageStatus').textContent='Toutes les prises de la scène ont été ajoutées à la timeline.';
+  });
+
+  document.querySelectorAll('.addSelectedScene').forEach(btn=>btn.onclick=async()=>{
+    const card=btn.closest('.recordedScene');
+    const ids=[...card.querySelectorAll('.sceneTakeCheck:checked')].map(x=>x.value);
+    if(!ids.length){alert('Coche au moins une prise de cette scène.');return}
+    pushHistory();
+    const all=await allTakes();
+    for(const id of ids){
+      const t=all.find(x=>x.id===id);
+      if(t) await addTakeToTimeline(t,false);
+    }
+    await renderTimeline();
+    $('montageStatus').textContent=ids.length+' prise(s) sélectionnée(s) ajoutée(s) à la timeline.';
+  });
+}
+
+async function addTakeToTimeline(t,render=true){
+  if(!t)return;
+  const duration=await getBlobDuration(t.blob);
+  M=getMontage();
+  M.clips.push({
+    id:uid(),
+    takeId:t.id,
+    sceneId:t.sceneId||'',
+    sceneTitle:t.scene||'Sans scène',
+    start:0,
+    end:Math.max(.1,duration||1),
+    volume:1,
+    transition:'none',
+    caption:'',
+    speed:1,
+    brightness:100,
+    contrast:100,
+    saturation:100,
+    rotation:0,
+    mirror:false
+  });
+  saveMontage(M);
+  if(render) await renderTimeline();
+}
+
+$('addAllScenes').onclick=async()=>{pushHistory();
+  const takes=await allTakes();
+  if(!takes.length){alert('Aucune scène enregistrée.');return}
+  const grouped=new Map();
+  takes.forEach(t=>{
+    const key=t.sceneId||('name:'+t.scene);
+    if(!grouped.has(key)) grouped.set(key,[]);
+    grouped.get(key).push(t);
+  });
+  for(const group of grouped.values()){
+    const chosen=group.find(t=>t.fav)||group[0];
+    await addTakeToTimeline(chosen,false);
+  }
+  await renderTimeline();
+  $('montageStatus').textContent=grouped.size+' scène(s) ajoutée(s) à la timeline avec leur meilleure prise.';
+};
+
+
+async function renderMontageLibrary(){
+  const takes=await allTakes();
+  $('montageLibrary').innerHTML=takes.length?takes.map(t=>`
+    <div class="libraryClip">
+      <b>${t.fav?'★ ':''}${t.scene}</b>
+      <small>${t.shot} · prise ${t.take}</small>
+      <button class="btn addTimeline" data-id="${t.id}" style="width:100%;margin-top:9px">+ Ajouter à la timeline</button>
+    </div>`).join(''):'<div class="empty">Aucun rush disponible.</div>';
+  document.querySelectorAll('.addTimeline').forEach(b=>b.onclick=async()=>{
+    const takes2=await allTakes(), t=takes2.find(x=>x.id===b.dataset.id);
+    if(!t)return;
+    pushHistory();
+    await addTakeToTimeline(t);
+    $('montageStatus').textContent='Clip ajouté à la timeline.';
+  });
+}
+$('addFavorites').onclick=async()=>{pushHistory();
+  const takes=await allTakes(), favs=takes.filter(t=>t.fav);
+  if(!favs.length){alert('Aucune prise favorite.');return}
+  for(const t of favs) await addTakeToTimeline(t,false);
+  await renderTimeline();
+  $('montageStatus').textContent=favs.length+' prise(s) favorite(s) ajoutée(s).'
+};
+$('clearTimeline').onclick=()=>{if(confirm('Vider la timeline ?')){pushHistory();M=getMontage();M.clips=[];saveMontage(M);renderTimeline()}};
+
+function getBlobDuration(blob){
+  return new Promise(resolve=>{
+    const v=document.createElement('video'),u=URL.createObjectURL(blob);
+    v.preload='metadata';v.src=u;
+    v.onloadedmetadata=()=>{const d=isFinite(v.duration)?v.duration:0;URL.revokeObjectURL(u);resolve(d)};
+    v.onerror=()=>{URL.revokeObjectURL(u);resolve(0)}
+  })
+}
+
+
+let selectedClipId=null, selectedClipUrl=null;
+
+function normalizeClip(c){
+  c.speed = c.speed ?? 1;
+  c.brightness = c.brightness ?? 100;
+  c.contrast = c.contrast ?? 100;
+  c.saturation = c.saturation ?? 100;
+  c.rotation = c.rotation ?? 0;
+  c.mirror = c.mirror ?? false;
+  c.volume = c.volume ?? 1;
+  c.transition = c.transition ?? 'none';
+  c.caption = c.caption ?? '';
+  return c;
+}
+
+async function selectTimelineClip(id){
+  M=getMontage();
+  const c=M.clips.find(x=>x.id===id);
+  if(!c)return;
+  normalizeClip(c);
+  selectedClipId=id;
+  document.querySelectorAll('.timelineItem').forEach(x=>x.classList.toggle('active',x.dataset.cid===id));
+
+  const takes=await allTakes(),t=takes.find(x=>x.id===c.takeId);
+  $('noClipTools').style.display='none';
+  $('clipToolsPanel').style.display='grid';
+  $('selectedClipBadge').textContent=t?('🎬 '+t.scene):'Clip sélectionné';
+  $('toolClipTitle').textContent=t?t.scene:'Clip';
+  $('toolClipMeta').textContent=t?(t.shot+' · prise '+t.take):'';
+
+  $('toolStart').value=(+c.start||0).toFixed(1);
+  $('toolEnd').value=(+c.end||0.1).toFixed(1);
+  $('toolSpeed').value=c.speed;
+  $('toolVolume').value=c.volume;
+  $('toolBrightness').value=c.brightness;
+  $('toolContrast').value=c.contrast;
+  $('toolSaturation').value=c.saturation;
+  $('toolRotation').value=String(c.rotation);
+  $('toolMirror').checked=!!c.mirror;
+  $('toolCaption').value=c.caption;
+  $('toolTransition').value=c.transition;
+  updateToolReadouts();
+
+  if(selectedClipUrl){URL.revokeObjectURL(selectedClipUrl);selectedClipUrl=null}
+  if(t){
+    selectedClipUrl=URL.createObjectURL(t.blob);
+    $('clipPreview').src=selectedClipUrl;
+    $('clipPreview').load();
+    $('clipPreview').onloadedmetadata=()=>{
+      $('clipPreview').currentTime=Math.min(+c.start||0,Math.max(0,($('clipPreview').duration||1)-.05));
+      updateClipPreviewStyle()
+    };
+  }
+}
+
+function getSelectedClip(){
+  M=getMontage();
+  const c=M.clips.find(x=>x.id===selectedClipId);
+  return c?normalizeClip(c):null
+}
+
+function updateToolReadouts(){
+  const start=Math.max(0,+$('toolStart').value||0),end=Math.max(start+.1,+$('toolEnd').value||start+.1);
+  $('toolDuration').textContent=((end-start)/(+$('toolSpeed').value||1)).toFixed(1)+' s';
+  $('toolSpeedVal').textContent=(+$('toolSpeed').value).toFixed(2)+'×';
+  $('toolVolumeVal').textContent=Math.round(+$('toolVolume').value*100)+'%';
+  $('toolBrightnessVal').textContent=$('toolBrightness').value+'%';
+  $('toolContrastVal').textContent=$('toolContrast').value+'%';
+  $('toolSaturationVal').textContent=$('toolSaturation').value+'%';
+  updateClipPreviewStyle()
+}
+function updateClipPreviewStyle(){
+  const v=$('clipPreview');if(!v)return;
+  v.style.filter='brightness('+$('toolBrightness').value+'%) contrast('+$('toolContrast').value+'%) saturate('+$('toolSaturation').value+'%)';
+  v.style.transform='rotate('+$('toolRotation').value+'deg) scaleX('+($('toolMirror').checked?-1:1)+')';
+  v.playbackRate=+$('toolSpeed').value||1;
+  v.volume=+$('toolVolume').value||0;
+  $('clipPreviewCaption').textContent=$('toolCaption').value||''
+}
+['toolStart','toolEnd','toolSpeed','toolVolume','toolBrightness','toolContrast','toolSaturation','toolRotation','toolMirror','toolCaption','toolTransition'].forEach(id=>{
+  $(id).addEventListener('input',updateToolReadouts);
+  $(id).addEventListener('change',updateToolReadouts)
+});
+
+$('applyClipTools').onclick=async()=>{pushHistory();
+  const c=getSelectedClip();if(!c)return;
+  c.start=Math.max(0,+$('toolStart').value||0);
+  c.end=Math.max(c.start+.1,+$('toolEnd').value||c.start+.1);
+  c.speed=Math.max(.25,+$('toolSpeed').value||1);
+  c.volume=Math.max(0,Math.min(1,+$('toolVolume').value||0));
+  c.brightness=+$('toolBrightness').value||100;
+  c.contrast=+$('toolContrast').value||100;
+  c.saturation=+$('toolSaturation').value||100;
+  c.rotation=+$('toolRotation').value||0;
+  c.mirror=$('toolMirror').checked;
+  c.caption=$('toolCaption').value;
+  c.transition=$('toolTransition').value;
+  saveMontage(M);
+  await renderTimeline();
+  await selectTimelineClip(c.id);
+  $('montageStatus').textContent='Modifications appliquées au clip.'
+};
+
+$('previewSelectedClip').onclick=async()=>{
+  const c=getSelectedClip();if(!c)return alert('Sélectionne un clip.');
+  const v=$('clipPreview');
+  v.currentTime=Math.max(0,+$('toolStart').value||0);
+  v.playbackRate=+$('toolSpeed').value||1;
+  v.volume=+$('toolVolume').value||0;
+  await v.play().catch(()=>{});
+  const start=+$('toolStart').value||0,end=+$('toolEnd').value||0.1;
+  const loop=()=>{const pct=Math.max(0,Math.min(100,((v.currentTime-start)/Math.max(.1,end-start))*100));$('clipMiniProgress').style.width=pct+'%';if(v.currentTime>=end||v.ended){v.pause();$('clipMiniProgress').style.width='100%'}else requestAnimationFrame(loop)};loop()
+};
+
+$('setStartAtPlayhead').onclick=()=>{if(!selectedClipId)return;$('toolStart').value=Math.max(0,$('clipPreview').currentTime||0).toFixed(1);updateToolReadouts()};
+$('setEndAtPlayhead').onclick=()=>{if(!selectedClipId)return;$('toolEnd').value=Math.max(.1,$('clipPreview').currentTime||.1).toFixed(1);updateToolReadouts()};
+
+$('splitAtPlayhead').onclick=async()=>{pushHistory();
+  const c=getSelectedClip();if(!c)return alert('Sélectionne un clip.');
+  const at=$('clipPreview').currentTime;
+  if(!isFinite(at)||at<=c.start+.1||at>=c.end-.1)return alert('Place la tête de lecture entre le début et la fin du clip.');
+  const idx=M.clips.findIndex(x=>x.id===c.id);
+  const second={...c,id:uid(),start:at};
+  c.end=at;
+  M.clips.splice(idx+1,0,second);
+  saveMontage(M);
+  await renderTimeline();
+  await selectTimelineClip(second.id);
+  $('montageStatus').textContent='Clip scindé en deux.'
+};
+
+$('duplicateClip').onclick=async()=>{pushHistory();
+  const c=getSelectedClip();if(!c)return;
+  const idx=M.clips.findIndex(x=>x.id===c.id),copy={...c,id:uid()};
+  M.clips.splice(idx+1,0,copy);saveMontage(M);await renderTimeline();await selectTimelineClip(copy.id)
+};
+$('deleteSelectedClip').onclick=async()=>{pushHistory();
+  if(!selectedClipId)return;
+  M=getMontage();M.clips=M.clips.filter(x=>x.id!==selectedClipId);saveMontage(M);
+  selectedClipId=null;$('clipToolsPanel').style.display='none';$('noClipTools').style.display='block';$('selectedClipBadge').textContent='Aucun clip sélectionné';
+  await renderTimeline()
+};
+$('resetClip').onclick=()=>{
+  const c=getSelectedClip();if(!c)return;
+  $('toolSpeed').value=1;$('toolVolume').value=1;$('toolBrightness').value=100;$('toolContrast').value=100;$('toolSaturation').value=100;
+  $('toolRotation').value='0';$('toolMirror').checked=false;$('toolCaption').value='';$('toolTransition').value='none';updateToolReadouts()
+};
+
+
+async function renderTimeline(){
+  M=getMontage();const takes=await allTakes();
+  if(!M.clips.length){$('timeline').innerHTML='<div class="timelineEmpty">La timeline est vide.<br>Ajoute des rushes depuis la bibliothèque.</div>';$('clipToolsPanel').style.display='none';$('noClipTools').style.display='block';$('selectedClipBadge').textContent='Aucun clip sélectionné';return}
+  $('timeline').innerHTML=M.clips.map((c,i)=>{
+    const t=takes.find(x=>x.id===c.takeId);
+    if(!t)return '';
+    normalizeClip(c);
+    return `<article class="timelineItem" data-cid="${c.id}">
+      <div class="timelineNum">${i+1}</div>
+      <h3>${t.scene}</h3><small>${t.shot} · prise ${t.take}</small><div class="chips"><span class="chip">🎬 ${t.scene}</span></div>
+      <div class="clipTools">
+        <label>Début (s)<input class="cStart" type="number" min="0" step=".1" value="${(+c.start).toFixed(1)}"></label>
+        <label>Fin (s)<input class="cEnd" type="number" min=".1" step=".1" value="${(+c.end).toFixed(1)}"></label>
+        <label>Volume<input class="cVol" type="number" min="0" max="1" step=".1" value="${c.volume??1}"></label>
+        <label>Transition<select class="cTrans">
+          <option value="none" ${c.transition==='none'?'selected':''}>Aucune</option>
+          <option value="fadeBlack" ${c.transition==='fadeBlack'?'selected':''}>Fondu noir</option>
+          <option value="fadeWhite" ${c.transition==='fadeWhite'?'selected':''}>Fondu blanc</option>
+          <option value="zoom" ${c.transition==='zoom'?'selected':''}>Zoom</option>
+        </select></label>
+      </div>
+      <label class="label" style="margin-top:8px">Texte sur le plan<input class="cCaption" value="${String(c.caption||'').replace(/"/g,'&quot;')}" placeholder="Optionnel"></label>
+      <div class="chips">
+        <span class="chip">${(+c.speed||1).toFixed(2)}×</span>
+        <span class="chip">☀ ${c.brightness||100}%</span>
+        ${c.rotation?`<span class="chip">↻ ${c.rotation}°</span>`:''}
+        ${c.mirror?'<span class="chip">⇋ miroir</span>':''}
+      </div>
+      <div class="moveRow"><button class="btn moveLeft">←</button><button class="btn removeClip">Retirer</button><button class="btn moveRight">→</button></div>
+    </article>`
+  }).join('');
+  document.querySelectorAll('.timelineItem').forEach(card=>{
+    const id=card.dataset.cid;
+    const update=()=>{
+      M=getMontage();const c=M.clips.find(x=>x.id===id);if(!c)return;
+      c.start=Math.max(0,+card.querySelector('.cStart').value||0);
+      c.end=Math.max(c.start+.1,+card.querySelector('.cEnd').value||c.start+.1);
+      c.volume=Math.max(0,Math.min(1,+card.querySelector('.cVol').value||0));
+      c.transition=card.querySelector('.cTrans').value;
+      c.caption=card.querySelector('.cCaption').value;
+      saveMontage(M)
+    };
+    card.querySelectorAll('input,select').forEach(x=>x.onchange=()=>{pushHistory();update()});
+    card.querySelector('.removeClip').onclick=e=>{e.stopPropagation();pushHistory();M=getMontage();M.clips=M.clips.filter(x=>x.id!==id);saveMontage(M);if(selectedClipId===id){selectedClipId=null;$('clipToolsPanel').style.display='none';$('noClipTools').style.display='block'}renderTimeline()};
+    card.querySelector('.moveLeft').onclick=e=>{e.stopPropagation();pushHistory();moveTimeline(id,-1)};
+    card.querySelector('.moveRight').onclick=e=>{e.stopPropagation();pushHistory();moveTimeline(id,1)};
+    card.onclick=e=>{if(!e.target.closest('button,input,select'))selectTimelineClip(id)};
+  })
+}
+function moveTimeline(id,dir){
+  M=getMontage();const i=M.clips.findIndex(x=>x.id===id),j=i+dir;
+  if(i<0||j<0||j>=M.clips.length)return;
+  [M.clips[i],M.clips[j]]=[M.clips[j],M.clips[i]];saveMontage(M);renderTimeline()
+}
+
+async function showTitleCard(text,seconds){
+  if(!text||seconds<=0)return;
+  $('previewTitle').textContent=text;$('previewTitle').classList.add('on');
+  await waitOrAbort(seconds*1000);
+  $('previewTitle').classList.remove('on')
+}
+function waitOrAbort(ms){return new Promise(resolve=>{const start=Date.now();const f=()=>{if(previewAbort||Date.now()-start>=ms)resolve();else requestAnimationFrame(f)};f()})}
+
+
+$('testMusicSelection').onclick=async()=>{
+  saveMontageInputs();M=getMontage();
+  const mus=await getAsset('music');
+  if(!mus)return alert('Ajoute d’abord une musique.');
+  if(musicTestEl){musicTestEl.pause();try{URL.revokeObjectURL(musicTestEl.src)}catch(e){}}
+  musicTestEl=document.createElement('audio');
+  musicTestEl.src=URL.createObjectURL(mus.blob);
+  musicTestEl.volume=M.musicVolume??.25;
+  musicTestEl.playbackRate=M.musicSpeed||1;
+  musicTestEl.preload='auto';
+  try{
+    await new Promise(resolve=>{musicTestEl.onloadedmetadata=resolve;musicTestEl.onerror=resolve;setTimeout(resolve,700)});
+    musicTestEl.currentTime=Math.min(M.musicTrimStart||0,Math.max(0,(musicTestEl.duration||1)-.05));
+    await musicTestEl.play();
+    $('musicStatus').textContent='🔊 Lecture de la sélection musicale…';
+    const end=Math.min(M.musicTrimEnd||musicTestEl.duration,musicTestEl.duration||M.musicTrimEnd);
+    const stopCheck=()=>{
+      if(!musicTestEl)return;
+      if(musicTestEl.currentTime>=end){musicTestEl.pause();$('musicStatus').textContent='✅ Sélection musicale prête';}
+      else requestAnimationFrame(stopCheck)
+    };
+    requestAnimationFrame(stopCheck);
+  }catch(e){
+    $('musicStatus').textContent='Impossible de lire cette musique : '+e.message;
+  }
+};
+$('stopMusicTest').onclick=()=>{
+  if(musicTestEl){musicTestEl.pause();try{musicTestEl.currentTime=0}catch(e){}}
+  $('musicStatus').textContent=M.musicName?'✅ Musique prête : '+M.musicName:'Aucune musique.'
+};
+
+async function startPreviewMusic(){
+  saveMontageInputs();M=getMontage();
+  const mus=await getAsset('music');
+  if(!mus)return null;
+  if(previewMusicEl){previewMusicEl.pause();try{URL.revokeObjectURL(previewMusicEl.src)}catch(e){}}
+  previewMusicEl=document.createElement('audio');
+  previewMusicEl.src=URL.createObjectURL(mus.blob);
+  previewMusicEl.loop=false;
+  previewMusicEl.volume=M.musicVolume??0;
+  previewMusicEl.playbackRate=M.musicSpeed||1;
+  previewMusicEl.preload='auto';
+  await new Promise(resolve=>{previewMusicEl.onloadedmetadata=resolve;previewMusicEl.onerror=resolve;setTimeout(resolve,800)});
+  try{
+    previewMusicEl.currentTime=Math.min(M.musicTrimStart||0,Math.max(0,(previewMusicEl.duration||1)-.05));
+    // actual start in film is handled by delayed start
+    const delay=(M.musicFilmStart||0)*1000;
+    if(delay>0) await waitOrAbort(delay);
+    if(previewAbort)return null;
+    await previewMusicEl.play();
+    $('musicStatus').textContent='🎵 Musique active dans l’aperçu';
+    const musicStartTime=performance.now();
+    const trimDur=Math.max(.1,((M.musicTrimEnd||previewMusicEl.duration)-(M.musicTrimStart||0))/(M.musicSpeed||1));
+    const fadeIn=M.musicFadeIn||0,fadeOut=M.musicFadeOut||0,base=M.musicVolume??0;
+    const loop=()=>{
+      if(!previewMusicEl||previewMusicEl.paused)return;
+      const t=(performance.now()-musicStartTime)/1000;
+      let g=1;
+      if(fadeIn>0&&t<fadeIn)g=Math.min(g,t/fadeIn);
+      if(fadeOut>0&&trimDur-t<fadeOut)g=Math.min(g,Math.max(0,(trimDur-t)/fadeOut));
+      previewMusicEl.volume=Math.max(0,Math.min(1,base*g));
+      if(t>=trimDur||previewMusicEl.currentTime>=(M.musicTrimEnd||previewMusicEl.duration)){previewMusicEl.pause();return}
+      requestAnimationFrame(loop)
+    };
+    requestAnimationFrame(loop);
+    return previewMusicEl;
+  }catch(e){
+    $('musicStatus').textContent='⚠️ Musique chargée mais lecture bloquée : '+e.message;
+    return null;
+  }
+}
+function stopPreviewMusic(){
+  if(previewMusicEl){
+    previewMusicEl.pause();
+    try{previewMusicEl.currentTime=0}catch(e){}
+    try{URL.revokeObjectURL(previewMusicEl.src)}catch(e){}
+    previewMusicEl=null;
+  }
+}
+
+$('previewMontage').onclick=async()=>{
+  M=getMontage();saveMontageInputs();M=getMontage();
+  if(!M.clips.length)return alert('Ajoute au moins un clip à la timeline.');
+  previewAbort=false;$('montageStatus').textContent='Lecture du montage…';
+  const takes=await allTakes(),v=$('montageVideo');
+  startPreviewMusic();
+  await showTitleCard(M.introTitle,+M.introDuration||0);
+  for(let i=0;i<M.clips.length&&!previewAbort;i++){
+    const c=M.clips[i],t=takes.find(x=>x.id===c.takeId);if(!t)continue;
+    document.querySelectorAll('.timelineItem').forEach(x=>x.classList.toggle('active',x.dataset.cid===c.id));
+    normalizeClip(c);
+    const u=URL.createObjectURL(t.blob);v.src=u;v.volume=(c.volume??1)*(M.videoMasterVolume??1);v.playbackRate=c.speed||1;
+    v.style.filter='brightness('+(c.brightness||100)+'%) contrast('+(c.contrast||100)+'%) saturate('+(c.saturation||100)+'%)';
+    v.style.transform='rotate('+(c.rotation||0)+'deg) scaleX('+(c.mirror?-1:1)+')';
+    $('previewTitle').textContent=c.caption||'';$('previewTitle').classList.toggle('on',!!c.caption);
+    await new Promise(r=>{v.onloadedmetadata=r;v.onerror=r});
+    v.currentTime=Math.min(c.start||0,Math.max(0,(v.duration||1)-.05));
+    await new Promise(r=>{v.onseeked=r;setTimeout(r,300)});
+    await v.play().catch(()=>{});
+    await new Promise(resolve=>{
+      const check=()=>{if(previewAbort||v.currentTime>=c.end||v.ended){v.pause();resolve()}else requestAnimationFrame(check)};check()
+    });
+    if(previewMusicEl&&M.duckMusic&&!previewMusicEl.paused)previewMusicEl.volume=M.musicVolume??0;
+    $('previewTitle').classList.remove('on');URL.revokeObjectURL(u);
+  }
+  if(!previewAbort)await showTitleCard(M.outroTitle,+M.outroDuration||0);
+  document.querySelectorAll('.timelineItem').forEach(x=>x.classList.remove('active'));
+  stopPreviewMusic();
+  $('musicStatus').textContent=M.musicName?'✅ Musique prête : '+M.musicName:'Aucune musique.';
+  $('montageStatus').textContent=previewAbort?'Lecture arrêtée.':'Aperçu terminé.'
+};
+$('stopPreview').onclick=()=>{previewAbort=true;$('montageVideo').pause();$('previewTitle').classList.remove('on');stopPreviewMusic();$('musicStatus').textContent=M.musicName?'✅ Musique prête : '+M.musicName:'Aucune musique.'};
+
+function drawTextCard(ctx,canvas,text,bg='#000'){
+  ctx.save();ctx.fillStyle=bg;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+  const fs=Math.max(34,Math.round(canvas.width*.055));ctx.font='900 '+fs+'px system-ui,sans-serif';
+  const lines=String(text||'').split('\n');const lh=fs*1.25;const y0=canvas.height/2-(lines.length-1)*lh/2;
+  lines.forEach((line,i)=>ctx.fillText(line,canvas.width/2,y0+i*lh,canvas.width*.82));
+  ctx.restore()
+}
+function drawCaption(ctx,canvas,text){
+  if(!text)return;
+  ctx.save();const fs=Math.max(26,Math.round(canvas.width*.035));ctx.font='800 '+fs+'px system-ui,sans-serif';ctx.textAlign='center';
+  ctx.lineWidth=Math.max(4,fs*.14);ctx.strokeStyle='#000';ctx.fillStyle='#fff';
+  const y=canvas.height*.88;ctx.strokeText(text,canvas.width/2,y,canvas.width*.85);ctx.fillText(text,canvas.width/2,y,canvas.width*.85);ctx.restore()
+}
+function transitionAlpha(type,local,duration){
+  const edge=Math.min(.45,duration/3);
+  if(type==='none'||edge<=0)return 1;
+  if(local<edge)return local/edge;
+  if(duration-local<edge)return (duration-local)/edge;
+  return 1
+}
+
+$('exportMontage').onclick=async()=>{
+  saveMontageInputs();M=getMontage();
+  if(!M.clips.length)return alert('La timeline est vide.');
+  if(!HTMLCanvasElement.prototype.captureStream||typeof MediaRecorder==='undefined')return alert("L'export vidéo n'est pas pris en charge par ce navigateur.");
+
+  $('exportMontage').disabled=true;$('montageProgress').style.width='0%';$('montageStatus').textContent='Préparation du film…';
+  const takes=await allTakes();
+  const valid=M.clips.map(c=>({c,t:takes.find(x=>x.id===c.takeId)})).filter(x=>x.t);
+  if(!valid.length){$('exportMontage').disabled=false;return alert('Aucun clip valide.')}
+
+  const probe=document.createElement('video');probe.src=URL.createObjectURL(valid[0].t.blob);probe.preload='metadata';
+  await new Promise(r=>{probe.onloadedmetadata=r;probe.onerror=r});
+  const W=probe.videoWidth||1280,H=probe.videoHeight||720;URL.revokeObjectURL(probe.src);
+
+  const canvas=document.createElement('canvas');canvas.width=W;canvas.height=H;const ctx=canvas.getContext('2d');
+  const videoStream=canvas.captureStream(30);
+  let ac=null,dest=null,clipGain=null,clipSource=null,musicEl=null,musicSource=null,musicGain=null,audioOk=false,musicOk=false,musicUrl=null;
+  const exp=document.createElement('video');exp.playsInline=true;exp.muted=false;exp.preload='auto';
+
+  try{
+    ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'playback'});
+    await ac.resume();
+    dest=ac.createMediaStreamDestination();
+
+    // Audio original des clips
+    clipSource=ac.createMediaElementSource(exp);
+    clipGain=ac.createGain();
+    clipGain.gain.value=1;
+    clipSource.connect(clipGain);
+    clipGain.connect(dest);
+
+    // Musique de fond
+    const mus=await getAsset('music');
+    if(mus){
+      musicEl=document.createElement('audio');
+      musicUrl=URL.createObjectURL(mus.blob);
+      musicEl.src=musicUrl;
+      musicEl.loop=false;
+      musicEl.preload='auto';
+      musicEl.volume=1;
+      musicEl.playbackRate=M.musicSpeed||1;
+
+      await new Promise(resolve=>{
+        musicEl.oncanplaythrough=resolve;
+        musicEl.onloadeddata=resolve;
+        musicEl.onerror=resolve;
+        setTimeout(resolve,1200);
+      });
+
+      musicEl.currentTime=Math.min(M.musicTrimStart||0,Math.max(0,(musicEl.duration||1)-.05));
+
+      musicSource=ac.createMediaElementSource(musicEl);
+      musicGain=ac.createGain();
+      musicGain.gain.value=0;
+      musicSource.connect(musicGain);
+      musicGain.connect(dest);
+      musicOk=true;
+    }
+
+    const audioTracks=dest.stream.getAudioTracks();
+    audioTracks.forEach(tr=>videoStream.addTrack(tr));
+    audioOk=audioTracks.length>0;
+    $('musicStatus').textContent=musicEl
+      ? (musicOk?'🎵 Musique injectée dans l’export':'⚠️ Musique chargée mais lecture impossible pendant l’export')
+      : 'Aucune musique pour cet export';
+  }catch(e){
+    audioOk=false;
+    musicOk=false;
+    $('musicStatus').textContent='⚠️ Mixage audio indisponible : '+e.message;
+  }
+
+  const mime=bestRecorderMime(),mr=mime?new MediaRecorder(videoStream,{mimeType:mime}):new MediaRecorder(videoStream),parts=[];
+  mr.ondataavailable=e=>{if(e.data.size)parts.push(e.data)};
+  const finished=new Promise(r=>mr.onstop=r);mr.start(300);
+
+  valid.forEach(x=>normalizeClip(x.c));
+  const total=(+M.introDuration||0)+valid.reduce((n,x)=>n+Math.max(.1,(x.c.end-x.c.start)/(x.c.speed||1)),0)+(+M.outroDuration||0);
+  let elapsed=0;
+  let musicStarted=false;
+  const musicFilmStart=Math.max(0,M.musicFilmStart||0);
+  const musicSelectionDur=Math.max(.1,((M.musicTrimEnd||0)-(M.musicTrimStart||0))/(M.musicSpeed||1));
+  const musicBaseGain=Math.max(0,Math.min(1,M.musicVolume??0));
+
+  async function syncExportMusic(currentFilmTime,isVideoClip){
+    if(!musicEl||!musicGain)return;
+    if(!musicStarted && currentFilmTime>=musicFilmStart){
+      try{
+        musicEl.currentTime=Math.min(M.musicTrimStart||0,Math.max(0,(musicEl.duration||1)-.05));
+        await musicEl.play();
+        musicStarted=!musicEl.paused;
+      }catch(e){musicStarted=false;musicOk=false}
+    }
+    if(!musicStarted)return;
+    const mt=(musicEl.currentTime-(M.musicTrimStart||0))/(M.musicSpeed||1);
+    if(mt>=musicSelectionDur || musicEl.currentTime>=(M.musicTrimEnd||musicEl.duration)){
+      musicEl.pause();musicGain.gain.value=0;return;
+    }
+    let g=musicBaseGain;
+    if(M.musicFadeIn>0 && mt<M.musicFadeIn)g*=Math.max(0,Math.min(1,mt/M.musicFadeIn));
+    if(M.musicFadeOut>0 && musicSelectionDur-mt<M.musicFadeOut)g*=Math.max(0,Math.min(1,(musicSelectionDur-mt)/M.musicFadeOut));
+    if(M.duckMusic && isVideoClip)g*=0.35;
+    musicGain.gain.value=g;
+  }
+
+  const updateProgress=extra=>{$('montageProgress').style.width=Math.min(100,((elapsed+extra)/Math.max(.1,total))*100)+'%'};
+
+  async function renderCard(text,secs){
+    if(!text||secs<=0)return;
+    const started=performance.now();
+    await new Promise(resolve=>{
+      const frame=now=>{const e=(now-started)/1000;drawTextCard(ctx,canvas,text);syncExportMusic(elapsed+Math.min(secs,e),false);updateProgress(Math.min(secs,e));if(e>=secs)resolve();else requestAnimationFrame(frame)};requestAnimationFrame(frame)
+    });elapsed+=secs
+  }
+
+  try{
+    await renderCard(M.introTitle,+M.introDuration||0);
+    for(let i=0;i<valid.length;i++){
+      const {c,t}=valid[i],u=URL.createObjectURL(t.blob);
+      exp.src=u;await new Promise(r=>{exp.onloadedmetadata=r;exp.onerror=r});
+      const start=Math.max(0,Math.min(c.start||0,Math.max(0,(exp.duration||1)-.05)));
+      const end=Math.max(start+.05,Math.min(c.end||exp.duration,exp.duration||c.end));
+      const sourceDur=end-start, speed=c.speed||1, dur=sourceDur/speed;exp.currentTime=start;exp.playbackRate=speed;if(clipGain)clipGain.gain.value=(c.volume??1)*(M.videoMasterVolume??1);
+      await new Promise(r=>{exp.onseeked=r;setTimeout(r,350)});
+      await exp.play().catch(()=>{});
+      await new Promise(resolve=>{
+        const frame=()=>{
+          const local=Math.max(0,exp.currentTime-start);
+          const sourceLocal=Math.max(0,exp.currentTime-start);
+          const outputLocal=sourceLocal/(c.speed||1);
+          ctx.save();
+          const a=transitionAlpha(c.transition,outputLocal,dur);
+          if(c.transition==='fadeWhite'){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H)}
+          else{ctx.fillStyle='#000';ctx.fillRect(0,0,W,H)}
+          ctx.globalAlpha=a;
+          ctx.filter='brightness('+(c.brightness||100)+'%) contrast('+(c.contrast||100)+'%) saturate('+(c.saturation||100)+'%)';
+          ctx.translate(W/2,H/2);
+          ctx.rotate((c.rotation||0)*Math.PI/180);
+          ctx.scale(c.mirror?-1:1,1);
+          let z=1;
+          if(c.transition==='zoom')z=1+(1-a)*.08;
+          ctx.scale(z,z);
+          ctx.drawImage(exp,-W/2,-H/2,W,H);
+          ctx.restore();drawCaption(ctx,canvas,c.caption);
+          syncExportMusic(elapsed+Math.min(dur,outputLocal),true);updateProgress(Math.min(dur,outputLocal));
+          if(exp.currentTime>=end||exp.ended){exp.pause();resolve()}else requestAnimationFrame(frame)
+        };requestAnimationFrame(frame)
+      });
+      elapsed+=dur;URL.revokeObjectURL(u)
+    }
+    await renderCard(M.outroTitle,+M.outroDuration||0);
+    if(musicEl){musicEl.pause();}
+    if(mr.state==='recording')mr.stop();await finished;
+    const blob=new Blob(parts,{type:mr.mimeType||'video/webm'});
+    download(blob,((P.title||'film')+'-montage-final.webm').replace(/\s+/g,'-'));
+    $('montageProgress').style.width='100%';
+    $('montageStatus').textContent='Film exporté'+(audioOk?' avec piste audio':' sans piste audio')+(M.musicName?(musicOk?' + musique.':' ; musique non intégrée sur ce navigateur.')+'.':' .');
+    $('musicStatus').textContent=M.musicName?(musicOk?'✅ Musique intégrée au film exporté':'⚠️ La musique n’a pas pu être intégrée à cet export'):'Aucune musique.';
+  }catch(err){
+    if(mr.state==='recording')mr.stop();
+    $('montageStatus').textContent='Échec export : '+err.message;alert('Export impossible : '+err.message)
+  }finally{
+    try{exp.pause()}catch(e){}
+    try{if(musicEl)musicEl.pause()}catch(e){}
+    try{if(musicUrl)URL.revokeObjectURL(musicUrl)}catch(e){}
+    try{await ac?.close()}catch(e){}
+    $('exportMontage').disabled=false
+  }
+};
+
+$('exportJson').onclick=()=>download(new Blob([JSON.stringify({project:P,montage:getMontage()},null,2)],{type:'application/json'}),(P.title||'film')+'-projet.json');
+$('clearAll').onclick=async()=>{if(confirm('Supprimer tous les rushes ?')){let d=await db();d.transaction('takes','readwrite').objectStore('takes').clear();renderRushes();if($('montage')?.classList.contains('on'))initMontage();refreshKPIs()}};
+
+async function refreshKPIs(){
+  P=get(); let takes=await allTakes().catch(()=>[]);
+  $('kScenes').textContent=P.scenes.length;
+  $('kPlans').textContent=P.scenes.reduce((n,s)=>n+(s.shots?.length||0),0);
+  $('kTakes').textContent=takes.length
+}
+refreshKPIs();
+if(!window.isSecureContext){
+  $('cameraHelp').textContent='Mode fichier local détecté : Android peut bloquer la caméra intégrée. Utilise « Filmer avec la caméra Samsung » pour tourner immédiatement.';
+}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
